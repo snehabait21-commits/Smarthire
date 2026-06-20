@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SmartHire — Create Account</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}"/>
+</head>
+<body>
+<div class="auth-wrapper">
+
+  <!-- LEFT PANEL -->
+  <div class="auth-left d-none d-lg-flex">
+    <div class="brand-block">
+      <div class="logo-mark"><i class="bi bi-briefcase-fill"></i></div>
+      <h1 class="brand-name">SmartHire</h1>
+      <p class="brand-tagline">Your job search, organised and intelligent.</p>
+    </div>
+    <div class="pipeline-showcase">
+      <p class="pipeline-label">Track every step of your journey</p>
+      <div class="pipeline">
+        <div class="stage stage--done">
+          <div class="stage-dot"><i class="bi bi-send-check-fill"></i></div>
+          <span>Applied</span>
+        </div>
+        <div class="stage-line stage-line--done"></div>
+        <div class="stage stage--active">
+          <div class="stage-dot"><i class="bi bi-person-video3"></i></div>
+          <span>Interview</span>
+        </div>
+        <div class="stage-line"></div>
+        <div class="stage stage--pending">
+          <div class="stage-dot"><i class="bi bi-trophy-fill"></i></div>
+          <span>Offer</span>
+        </div>
+      </div>
+    </div>
+    <ul class="feature-list">
+      <li><i class="bi bi-check-circle-fill"></i> Track applications across companies</li>
+      <li><i class="bi bi-check-circle-fill"></i> Analyse job descriptions for keywords</li>
+      <li><i class="bi bi-check-circle-fill"></i> Never miss a follow-up</li>
+    </ul>
+  </div>
+
+  <!-- RIGHT PANEL -->
+  <div class="auth-right">
+    <div class="auth-card">
+      <div class="auth-card__header">
+        <div class="mobile-logo d-flex d-lg-none">
+          <i class="bi bi-briefcase-fill"></i>
+          <span>SmartHire</span>
+        </div>
+        <h2 class="auth-title">Create your account</h2>
+        <p class="auth-subtitle">Free forever. No credit card needed.</p>
+      </div>
+
+      <form action="/signup" method="POST" novalidate id="signupForm">
+        <div class="name-row">
+          <div class="form-group-custom">
+            <label for="first_name">First name</label>
+            <div class="input-wrap">
+              <i class="bi bi-person input-icon"></i>
+              <input type="text" id="first_name" name="first_name"
+                class="form-control custom-input"
+                placeholder="Sneha" required autocomplete="given-name"/>
+            </div>
+          </div>
+          <div class="form-group-custom">
+            <label for="last_name">Last name</label>
+            <div class="input-wrap">
+              <input type="text" id="last_name" name="last_name"
+                class="form-control custom-input"
+                placeholder="Sharma" required autocomplete="family-name"/>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group-custom">
+          <label for="email">Email address</label>
+          <div class="input-wrap">
+            <i class="bi bi-envelope input-icon"></i>
+            <input type="email" id="email" name="email"
+              class="form-control custom-input"
+              placeholder="you@example.com" required autocomplete="email"/>
+          </div>
+        </div>
+
+        <div class="form-group-custom">
+          <label for="password">Password</label>
+          <div class="input-wrap">
+            <i class="bi bi-lock input-icon"></i>
+            <input type="password" id="password" name="password"
+              class="form-control custom-input"
+              placeholder="Min. 8 characters" required
+              autocomplete="new-password" minlength="8"/>
+            <button type="button" class="toggle-password" aria-label="Toggle password visibility">
+              <i class="bi bi-eye" id="toggleIcon"></i>
+            </button>
+          </div>
+          <div class="strength-bar-wrap">
+            <div class="strength-bar__track">
+              <div class="strength-bar__fill" id="strengthFill"></div>
+            </div>
+            <span class="strength-bar__label" id="strengthLabel"></span>
+          </div>
+        </div>
+
+        <div class="form-group-custom">
+          <label for="confirm_password">Confirm password</label>
+          <div class="input-wrap">
+            <i class="bi bi-lock-fill input-icon"></i>
+            <input type="password" id="confirm_password" name="confirm_password"
+              class="form-control custom-input"
+              placeholder="Repeat your password" required autocomplete="new-password"/>
+          </div>
+          <p class="match-msg" id="matchMsg"></p>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-sm" role="alert">
+                <i class="bi bi-exclamation-circle-fill me-2"></i>{{ message }}
+              </div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
+        <button type="submit" class="btn-primary-custom w-100">
+          Create account <i class="bi bi-arrow-right ms-1"></i>
+        </button>
+
+        <p class="terms-note">
+          By creating an account you agree to our
+          <a href="/terms">Terms of Service</a> and <a href="/privacy">Privacy Policy</a>.
+        </p>
+      </form>
+
+      <div class="auth-divider"><span>or</span></div>
+      <p class="auth-switch">Already have an account? <a href="/login">Sign in</a></p>
+    </div>
+  </div>
+
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  // Password toggle
+  const toggleBtn = document.querySelector('.toggle-password');
+  const passwordInput = document.getElementById('password');
+  const toggleIcon = document.getElementById('toggleIcon');
+  toggleBtn.addEventListener('click', () => {
+    const isPassword = passwordInput.type === 'password';
+    passwordInput.type = isPassword ? 'text' : 'password';
+    toggleIcon.className = isPassword ? 'bi bi-eye-slash' : 'bi bi-eye';
+  });
+
+  // Password strength
+  const strengthFill = document.getElementById('strengthFill');
+  const strengthLabel = document.getElementById('strengthLabel');
+  passwordInput.addEventListener('input', () => {
+    const val = passwordInput.value;
+    let score = 0;
+    if (val.length >= 8) score++;
+    if (/[A-Z]/.test(val)) score++;
+    if (/[0-9]/.test(val)) score++;
+    if (/[^A-Za-z0-9]/.test(val)) score++;
+    const levels = ['', 'Weak', 'Fair', 'Good', 'Strong'];
+    const colors = ['', '#e74c3c', '#F5A623', '#3498db', '#00C9A7'];
+    const widths = ['0%', '25%', '50%', '75%', '100%'];
+    strengthFill.style.width = val.length ? widths[score] : '0%';
+    strengthFill.style.background = colors[score];
+    strengthLabel.textContent = val.length ? levels[score] : '';
+    strengthLabel.style.color = colors[score];
+  });
+
+  // Confirm password match
+  const confirmInput = document.getElementById('confirm_password');
+  const matchMsg = document.getElementById('matchMsg');
+  confirmInput.addEventListener('input', () => {
+    if (confirmInput.value === '') { matchMsg.textContent = ''; return; }
+    if (confirmInput.value === passwordInput.value) {
+      matchMsg.textContent = '✓ Passwords match';
+      matchMsg.style.color = '#00C9A7';
+    } else {
+      matchMsg.textContent = '✗ Passwords do not match';
+      matchMsg.style.color = '#e74c3c';
+    }
+  });
+</script>
+</body>
+</html>

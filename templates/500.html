@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SmartHire — Server Error</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+      background: #F7F9FC;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      text-align: center;
+    }
+    .error-wrap { max-width: 420px; padding: 24px; }
+    .error-icon { font-size: 72px; color: #E2E8F0; margin-bottom: 24px; }
+    .error-code { font-size: 80px; font-weight: 700; color: #0F1C2E; line-height: 1; margin-bottom: 8px; }
+    .error-title { font-size: 22px; font-weight: 700; color: #0F1C2E; margin-bottom: 10px; }
+    .error-msg { font-size: 14px; color: #8492A6; margin-bottom: 32px; line-height: 1.6; }
+    .btn-home {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: #00C9A7; color: #0F1C2E;
+      font-size: 14px; font-weight: 700;
+      padding: 12px 28px; border-radius: 12px;
+      text-decoration: none;
+      transition: background 0.2s;
+    }
+    .btn-home:hover { background: #00b598; color: #0F1C2E; }
+  </style>
+</head>
+<body>
+  <div class="error-wrap">
+    <div class="error-icon"><i class="bi bi-exclamation-triangle"></i></div>
+    <div class="error-code">500</div>
+    <h1 class="error-title">Something went wrong</h1>
+    <p class="error-msg">Our server ran into an unexpected error. Please try again in a moment.</p>
+    <a href="/dashboard" class="btn-home">
+      <i class="bi bi-house"></i> Back to Dashboard
+    </a>
+  </div>
+</body>
+</html>

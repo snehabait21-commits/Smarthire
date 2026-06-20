@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SmartHire — Login</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}"/>
+</head>
+<body>
+<div class="auth-wrapper">
+
+  <!-- LEFT PANEL -->
+  <div class="auth-left d-none d-lg-flex">
+    <div class="brand-block">
+      <div class="logo-mark"><i class="bi bi-briefcase-fill"></i></div>
+      <h1 class="brand-name">SmartHire</h1>
+      <p class="brand-tagline">Your job search, organised and intelligent.</p>
+    </div>
+    <div class="pipeline-showcase">
+      <p class="pipeline-label">Track every step of your journey</p>
+      <div class="pipeline">
+        <div class="stage stage--done">
+          <div class="stage-dot"><i class="bi bi-send-check-fill"></i></div>
+          <span>Applied</span>
+        </div>
+        <div class="stage-line stage-line--done"></div>
+        <div class="stage stage--active">
+          <div class="stage-dot"><i class="bi bi-person-video3"></i></div>
+          <span>Interview</span>
+        </div>
+        <div class="stage-line"></div>
+        <div class="stage stage--pending">
+          <div class="stage-dot"><i class="bi bi-trophy-fill"></i></div>
+          <span>Offer</span>
+        </div>
+      </div>
+    </div>
+    <ul class="feature-list">
+      <li><i class="bi bi-check-circle-fill"></i> Track applications across companies</li>
+      <li><i class="bi bi-check-circle-fill"></i> Analyse job descriptions for keywords</li>
+      <li><i class="bi bi-check-circle-fill"></i> Never miss a follow-up</li>
+    </ul>
+  </div>
+
+  <!-- RIGHT PANEL -->
+  <div class="auth-right">
+    <div class="auth-card">
+      <div class="auth-card__header">
+        <div class="mobile-logo d-flex d-lg-none">
+          <i class="bi bi-briefcase-fill"></i>
+          <span>SmartHire</span>
+        </div>
+        <h2 class="auth-title">Welcome back</h2>
+        <p class="auth-subtitle">Sign in to your account to continue</p>
+      </div>
+
+      <form action="/login" method="POST" novalidate>
+        <div class="form-group-custom">
+          <label for="email">Email address</label>
+          <div class="input-wrap">
+            <i class="bi bi-envelope input-icon"></i>
+            <input type="email" id="email" name="email"
+              class="form-control custom-input"
+              placeholder="you@example.com" required autocomplete="email"/>
+          </div>
+        </div>
+
+        <div class="form-group-custom">
+          <div class="label-row">
+            <label for="password">Password</label>
+            <a href="/forgot-password" class="forgot-link">Forgot password?</a>
+          </div>
+          <div class="input-wrap">
+            <i class="bi bi-lock input-icon"></i>
+            <input type="password" id="password" name="password"
+              class="form-control custom-input"
+              placeholder="Enter your password" required autocomplete="current-password"/>
+            <button type="button" class="toggle-password" aria-label="Toggle password visibility">
+              <i class="bi bi-eye" id="toggleIcon"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="form-check remember-check">
+          <input class="form-check-input" type="checkbox" id="rememberMe" name="remember"/>
+          <label class="form-check-label" for="rememberMe">Keep me signed in</label>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-sm" role="alert">
+                <i class="bi bi-exclamation-circle-fill me-2"></i>{{ message }}
+              </div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
+        <button type="submit" class="btn-primary-custom w-100">
+          Sign in <i class="bi bi-arrow-right ms-1"></i>
+        </button>
+      </form>
+
+      <div class="auth-divider"><span>or</span></div>
+      <p class="auth-switch">Don't have an account? <a href="/signup">Create one free</a></p>
+    </div>
+  </div>
+
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  const toggleBtn = document.querySelector('.toggle-password');
+  const passwordInput = document.getElementById('password');
+  const toggleIcon = document.getElementById('toggleIcon');
+  toggleBtn.addEventListener('click', () => {
+    const isPassword = passwordInput.type === 'password';
+    passwordInput.type = isPassword ? 'text' : 'password';
+    toggleIcon.className = isPassword ? 'bi bi-eye-slash' : 'bi bi-eye';
+  });
+</script>
+</body>
+</html>

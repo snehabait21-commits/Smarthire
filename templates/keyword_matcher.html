@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SmartHire — Keyword Matcher</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}"/>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/keyword.css') }}"/>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <div class="navbar-brand">
+    <div class="nav-logo"><i class="bi bi-briefcase-fill"></i></div>
+    <span>SmartHire</span>
+  </div>
+  <div class="navbar-right">
+    <a href="/dashboard" class="btn-logout">
+      <i class="bi bi-arrow-left"></i> Back to Dashboard
+    </a>
+  </div>
+</nav>
+
+<main class="main-content">
+  <div class="km-wrap">
+
+    <!-- Header -->
+    <div class="km-header">
+      <div>
+        <h1 class="page-title">Keyword Matcher</h1>
+        <p class="page-subtitle">
+          Analysing: <strong>{{ app.role }}</strong> at <strong>{{ app.company }}</strong>
+        </p>
+      </div>
+      <div class="match-score-ring" id="scoreRing">
+        <svg viewBox="0 0 36 36">
+          <path class="ring-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+          <path class="ring-fill" id="ringFill" stroke-dasharray="0, 100"
+            d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+        </svg>
+        <div class="ring-label">
+          <span class="ring-percent" id="ringPercent">0%</span>
+          <span class="ring-text">match</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="km-grid">
+
+      <!-- LEFT: Resume input -->
+      <div class="km-card">
+        <div class="km-card__header">
+          <i class="bi bi-file-person"></i>
+          <h3>Your Resume</h3>
+        </div>
+        <p class="km-card__hint">Paste your resume text below</p>
+        <textarea id="resumeText" class="km-textarea"
+          placeholder="Paste your resume content here...&#10;&#10;e.g. Skills: Python, SQL, Excel, Tableau&#10;Experience: Data Analyst at XYZ..."></textarea>
+        <button class="btn-analyse" id="analyseBtn" onclick="analyseKeywords()">
+          <i class="bi bi-search"></i> Analyse Keywords
+        </button>
+      </div>
+
+      <!-- RIGHT: Job description preview -->
+      <div class="km-card">
+        <div class="km-card__header">
+          <i class="bi bi-file-text"></i>
+          <h3>Job Description</h3>
+        </div>
+        <p class="km-card__hint">Keywords extracted from the job posting</p>
+        <div class="jd-preview" id="jdPreview">
+          {% if app.job_description %}
+            {{ app.job_description }}
+          {% else %}
+            <span class="no-jd">No job description saved for this application.
+            <a href="/application/edit/{{ app.id }}">Add one here →</a></span>
+          {% endif %}
+        </div>
+      </div>
+
+    </div>
+
+    <!-- RESULTS SECTION -->
+    <div class="results-section" id="resultsSection" style="display:none;">
+
+      <!-- Missing keywords -->
+      <div class="result-card result-card--missing">
+        <div class="result-card__header">
+          <i class="bi bi-x-circle-fill"></i>
+          <h3>Missing Keywords <span class="count-badge" id="missingCount">0</span></h3>
+        </div>
+        <p class="result-card__hint">Add these to your resume to improve your chances</p>
+        <div class="keywords-wrap" id="missingKeywords"></div>
+      </div>
+
+      <!-- Matched keywords -->
+      <div class="result-card result-card--matched">
+        <div class="result-card__header">
+          <i class="bi bi-check-circle-fill"></i>
+          <h3>Matched Keywords <span class="count-badge count-badge--green" id="matchedCount">0</span></h3>
+        </div>
+        <p class="result-card__hint">Great! These keywords are already in your resume</p>
+        <div class="keywords-wrap" id="matchedKeywords"></div>
+      </div>
+
+    </div>
+
+    <!-- Tips section -->
+    <div class="tips-card" id="tipsCard" style="display:none;">
+      <div class="tips-header">
+        <i class="bi bi-lightbulb-fill"></i>
+        <h3>Tips to improve your resume</h3>
+      </div>
+      <ul class="tips-list" id="tipsList"></ul>
+    </div>
+
+  </div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  // Job description from Flask
+  const jobDescription = `{{ app.job_description | replace('`', "'") | safe }}`;
+
+  // Common stopwords to ignore
+  const STOPWORDS = new Set([
+    'the','and','for','are','was','were','with','that','this','from',
+    'have','has','will','our','you','your','their','they','them','been',
+    'what','which','who','how','all','any','can','its','not','but','per',
+    'also','more','into','such','than','then','when','where','able','must',
+    'should','would','could','may','about','each','other','some','these',
+    'those','work','working','role','team','company','position','including',
+    'experience','ability','skills','skill','strong','good','knowledge',
+    'looking','seeking','required','requirements','responsibilities','job',
+    'candidate','ideal','years','year','least','plus'
+  ]);
+
+  function extractKeywords(text) {
+    return [...new Set(
+      text.toLowerCase()
+        .replace(/[^a-z0-9\s\+\#]/g, ' ')
+        .split(/\s+/)
+        .filter(w => w.length > 2 && !STOPWORDS.has(w))
+    )];
+  }
+
+  function analyseKeywords() {
+    const resumeText = document.getElementById('resumeText').value.trim();
+    if (!resumeText) {
+      alert('Please paste your resume text first!');
+      return;
+    }
+    if (!jobDescription.trim()) {
+      alert('No job description found. Please edit the application and add one.');
+      return;
+    }
+
+    const jdKeywords   = extractKeywords(jobDescription);
+    const resumeKeywords = new Set(extractKeywords(resumeText));
+
+    const matched = jdKeywords.filter(k => resumeKeywords.has(k));
+    const missing = jdKeywords.filter(k => !resumeKeywords.has(k));
+
+    const total = jdKeywords.length;
+    const score = total > 0 ? Math.round((matched.length / total) * 100) : 0;
+
+    // Update score ring
+    document.getElementById('ringPercent').textContent = score + '%';
+    document.getElementById('ringFill').setAttribute('stroke-dasharray', `${score}, 100`);
+
+    const ringColor = score >= 70 ? '#00C9A7' : score >= 40 ? '#F5A623' : '#ef4444';
+    document.getElementById('ringFill').style.stroke = ringColor;
+
+    // Show results
+    document.getElementById('resultsSection').style.display = 'grid';
+    document.getElementById('tipsCard').style.display = 'block';
+
+    // Render missing keywords
+    document.getElementById('missingCount').textContent = missing.length;
+    document.getElementById('missingKeywords').innerHTML = missing.length
+      ? missing.map(k => `<span class="kw-tag kw-tag--missing">${k}</span>`).join('')
+      : '<p class="all-good">🎉 No missing keywords!</p>';
+
+    // Render matched keywords
+    document.getElementById('matchedCount').textContent = matched.length;
+    document.getElementById('matchedKeywords').innerHTML = matched.length
+      ? matched.map(k => `<span class="kw-tag kw-tag--matched">${k}</span>`).join('')
+      : '<p class="no-match">No matches found yet.</p>';
+
+    // Tips
+    const tips = [];
+    if (missing.length > 0) tips.push(`Add these missing keywords naturally into your Skills or Experience section: <strong>${missing.slice(0,5).join(', ')}</strong>${missing.length > 5 ? '...' : ''}`);
+    if (score < 50) tips.push('Your resume matches less than 50% of the job keywords. Consider tailoring it specifically for this role.');
+    if (score >= 70) tips.push('Great match! Your resume covers most keywords. Focus on making your experience descriptions compelling.');
+    tips.push('Use the exact same terminology as the job description — ATS systems match exact words.');
+    tips.push('Add a Skills section if you don\'t have one — it\'s the easiest place to include missing keywords.');
+
+    document.getElementById('tipsList').innerHTML = tips.map(t => `<li>${t}</li>`).join('');
+
+    // Scroll to results
+    document.getElementById('resultsSection').scrollIntoView({ behavior: 'smooth' });
+  }
+</script>
+</body>
+</html>
